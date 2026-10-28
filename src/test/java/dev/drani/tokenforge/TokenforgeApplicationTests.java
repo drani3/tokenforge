@@ -1,4 +1,4 @@
-package dev.aditya.tokenforge;
+package dev.drani.tokenforge;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

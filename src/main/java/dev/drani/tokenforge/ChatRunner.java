@@ -1,4 +1,4 @@
-package dev.aditya.tokenforge;
+package dev.drani.tokenforge;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

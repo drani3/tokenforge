@@ -1,4 +1,4 @@
-package dev.aditya.tokenforge;
+package dev.drani.tokenforge;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

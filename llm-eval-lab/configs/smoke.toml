@@ -1,6 +1,6 @@
 # Smoke test: tiny math set, answer-only prompt, deterministic decoding.
 name = "smoke"
-dataset = "data/smoke_math.jsonl"
+datasets = ["data/smoke_math.jsonl"]
 scorer = "numeric_match"
 models = ["llama3.2:3b"]
 

@@ -22,20 +22,47 @@ Stack: Python 3.11+, [Ollama](https://ollama.com) (local, `localhost:11434`), `o
 **Done when:** one command runs a config over a dataset and writes a results file. ✅ `.venv/Scripts/python -m lab.runner configs/smoke.toml`
 
 ## Phase 2 — Model comparison on checkable tasks
-Datasets (start with ~100–200 examples each):
-- [ ] **Math**: GSM8K subset — exact match on final number (write an answer extractor)
-- [ ] **Classification**: sentiment or topic — accuracy, macro-F1
-- [ ] **Structured extraction**: text → JSON fields using Ollama's `format` (JSON schema) — validity rate + per-field accuracy
+
+### 2a. Math: GSM8K vs GSM-Symbolic (contamination check)
+GSM8K has been public since 2021 and is likely in most models' training data, so a high score may reflect memorization rather than reasoning. [GSM-Symbolic](https://arxiv.org/abs/2410.05229) (Apple, 2024) turns 100 GSM8K questions into templates and generates variants with new names and numbers.
+
+Setup:
+- [x] Pull 2–3 more models alongside `llama3.2:3b` (e.g. `qwen2.5:7b`, `gemma2:2b`)
+- [x] Inspect the GSM-Symbolic dataset on Hugging Face (format, fields, how variants link to their GSM8K original)
+- [x] Loader → `data/gsm8k_originals.jsonl`: the 100 GSM8K questions GSM-Symbolic is built from
+- [x] Loader → `data/gsm_symbolic_main.jsonl`: their symbolic variants (keep the link to the original question)
+- [x] Loaders → `data/gsm_symbolic_p1.jsonl`, `data/gsm_symbolic_p2.jsonl`: harder variants (+1 / +2 reasoning steps)
+- [x] Multi-model config (`configs/gsm_contamination.toml`), same prompt and options everywhere
+- [x] Analysis script (`lab/analyze.py`): accuracy ± cluster-bootstrap CI, paired gap vs GSM8K, variant-set spread
+
+Experiments:
+- [ ] **GSM8K vs GSM-Symbolic**: accuracy per model on originals vs variants of the *same* 100 questions
+- [ ] **Contamination gap** = GSM8K accuracy − GSM-Symbolic accuracy, per model, with bootstrap 95% CI
+- [ ] **Variance across variants**: accuracy per variant set (same templates, different names/numbers) — how much does it move?
+- [ ] **Difficulty curve**: accuracy on originals → main → P1 → P2
+- [ ] *(Optional)* **Own templates**: write 10–20 templates and generate fresh numbers at run time. Nobody can have trained on these, so they're contamination-free.
 
 Analysis:
-- [ ] Table: model × task → score, mean latency, tokens/sec
-- [ ] Plot accuracy vs. latency, mark the **Pareto frontier**
+- [ ] Table: model × {GSM8K, Symbolic main, P1, P2} → accuracy ± CI, mean latency, tokens/sec
+- [ ] Grouped bar chart: GSM8K vs GSM-Symbolic per model (the headline comparison)
+- [ ] Line chart: accuracy vs difficulty level per model
+- [ ] Plot accuracy vs latency, mark the **Pareto frontier**
+- [ ] Error analysis: read ~20 failures where a model got the original right but the variant wrong
+
+### 2b. Other tasks
+- [ ] **Classification**: sentiment or topic — accuracy, macro-F1
+- [ ] **Structured extraction**: text → JSON fields using Ollama's `format` (JSON schema) — validity rate + per-field accuracy
 
 ## Phase 3 — Optimization experiments (one variable at a time)
 - [ ] **Prompting**: zero-shot vs few-shot (1/3/5) vs chain-of-thought vs "answer only"
 - [ ] **Quantization**: same model at `q4_K_M` vs `q8_0` vs `fp16` — accuracy lost vs speed gained
 - [ ] **Sampling**: temperature 0 vs 0.7; **self-consistency** (5 samples, majority vote) — gain vs 5× cost
 - [ ] **Context size** (`num_ctx`): effect on speed/memory
+- [ ] **Output format** (does forcing structure hurt reasoning? cf. *"Let Me Speak Freely?"*, Tam et al. 2024):
+  1. free text + `Answer: n` line + regex extraction (current setup)
+  2. JSON schema via Ollama `format`: `{"reasoning": str, "answer": number}`
+  3. JSON with `answer` only (no room to reason)
+  - measure accuracy, parse-failure rate, output tokens, latency
 - [ ] Write a short conclusion per experiment
 
 ## Phase 4 — RAG pipeline

@@ -1,3 +1,6 @@
 .venv/
 __pycache__/
 results/
+# GSM-Symbolic is CC BY-NC-ND 4.0: rebuild locally with `python -m lab.prepare_gsm`, don't commit
+data/raw/
+data/gsm*.jsonl

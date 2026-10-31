@@ -1,0 +1,24 @@
+# GSM8K originals vs GSM-Symbolic variants of the same questions (Phase 2a).
+# Build the data first: python -m lab.prepare_gsm --instances 10
+name = "gsm_contamination"
+datasets = [
+    "data/gsm8k_originals.jsonl",
+    "data/gsm_symbolic_main.jsonl",
+    "data/gsm_symbolic_p1.jsonl",
+    "data/gsm_symbolic_p2.jsonl",
+]
+scorer = "numeric_match"
+models = ["gemma2:2b", "llama3.2:3b", "qwen2.5:7b"]
+
+# Zero-shot chain-of-thought. The paper uses 8-shot CoT; comparing the two is a Phase 3 experiment.
+[prompt]
+system = "You are an expert problem solver."
+user = """Solve the following math problem step by step. End your response with a final line of the form 'Answer: <number>'.
+
+Problem: {question}"""
+
+# Greedy decoding, as in the paper. num_predict caps runaway generations.
+[options]
+temperature = 0
+seed = 42
+num_predict = 1024

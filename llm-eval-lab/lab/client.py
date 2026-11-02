@@ -33,8 +33,19 @@ def _client(host: str | None) -> ollama.Client:
 def chat(model: str, messages: list[dict], options: dict | None = None,
          host: str | None = None) -> ChatResult:
     resp = _client(host).chat(model=model, messages=messages, options=options or {})
+    return _result(resp.message.content, resp)
+
+
+def complete(model: str, prompt: str, options: dict | None = None,
+             host: str | None = None) -> ChatResult:
+    """Raw text continuation: no chat template, the model just continues `prompt`."""
+    resp = _client(host).generate(model=model, prompt=prompt, raw=True, options=options or {})
+    return _result(resp.response, resp)
+
+
+def _result(content: str | None, resp) -> ChatResult:
     return ChatResult(
-        content=resp.message.content or "",
+        content=content or "",
         prompt_tokens=resp.prompt_eval_count or 0,
         output_tokens=resp.eval_count or 0,
         total_s=(resp.total_duration or 0) / NS,

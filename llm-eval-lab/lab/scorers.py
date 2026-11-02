@@ -8,9 +8,11 @@ and reports two views:
 import re
 
 _NUMBER = r"-?\d[\d,]*(?:\.\d+)?"
-# 'Answer: 14', '**Answer:** $14', 'answer = 14'. Requires ':' or '=' so prose like
+# GSM-Symbolic variants use several currencies, not just dollars
+_CURRENCY = "$€£¥₹₺₣₩₽"
+# 'Answer: 14', '**Answer:** $14', 'Answer: ₺206', 'answer = 14'. Requires ':' or '=' so prose like
 # "here's the answer: we have 12 oranges" doesn't match (the number must follow directly).
-_ANSWER = re.compile(rf"answer\s*\**\s*[:=]\s*\**\s*\$?\s*({_NUMBER})", re.IGNORECASE)
+_ANSWER = re.compile(rf"answer\s*\**\s*[:=]\s*\**\s*[{re.escape(_CURRENCY)}]?\s*({_NUMBER})", re.IGNORECASE)
 
 
 def _to_float(text: str) -> float | None:

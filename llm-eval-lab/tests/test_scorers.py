@@ -15,6 +15,12 @@ class ExtractAnswerTest(unittest.TestCase):
         self.assertEqual(extract_answer("**Answer:** $1,250.50"), (1250.5, "format"))
         self.assertEqual(extract_answer("**Answer: 57.5%**"), (57.5, "format"))
 
+    def test_other_currencies(self):
+        # GSM-Symbolic variants use ¥, €, ₺ and ₣ as well as $
+        for text, expected in [("Answer: ₺206", 206.0), ("Answer: €135.00**", 135.0),
+                               ("**Answer:** ¥1,596", 1596.0), ("Answer: ₣21,600**", 21600.0)]:
+            self.assertEqual(extract_answer(text), (expected, "format"), text)
+
     def test_prose_answer_word_falls_back_to_last_number(self):
         text = "here's the answer: we have 12 oranges and 4 apples, we eat 2 fruits, now we have 14 fruits"
         self.assertEqual(extract_answer(text), (14.0, "fallback"))
